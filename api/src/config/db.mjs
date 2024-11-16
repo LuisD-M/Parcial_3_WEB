@@ -33,7 +33,7 @@ class Db {
   query = async (query, values = []) => {
     try {
       await this.#client.connect();
-      console.log(query);  // Log the query for debugging
+      console.log(query);  
       const resultados = await this.#client.query(query, values);
       return resultados;
     } catch (err) {

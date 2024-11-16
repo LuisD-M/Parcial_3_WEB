@@ -5,10 +5,13 @@ const router = express.Router();
 
 const pacienteController = new PacienteController();
 
-// Rutas
+// Rutas de paciente
 router.get('/:id', pacienteController.obtenerPaciente); 
 router.post('/', pacienteController.crearPaciente);  
 router.post('/login', pacienteController.login);  
-router.post('/assign-appointment', pacienteController.assignAppointment);  
+router.get('/appointment', pacienteController.listarCitasPaciente); 
+router.post('/appointment', pacienteController.asignarCita); 
+router.put('/appointment/:appointmentId', pacienteController.editarCita); 
+router.delete('/appointment/:appointmentId', pacienteController.eliminarCita); 
 
 export { router as PacienteRoutes };

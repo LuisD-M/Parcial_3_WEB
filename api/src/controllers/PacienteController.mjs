@@ -1,61 +1,92 @@
-import { PacienteService } from '../services/PacienteService.mjs';
-import { generateJWT } from '../utils/jwt.mjs';
+import jwt from 'jsonwebtoken';
+import { Paciente } from '../models/Paciente.mjs';  
+import { CitaMedica } from '../models/Citamedica.mjs'; 
 
 class PacienteController {
+
+  
   async login(req, res) {
     const { email, password } = req.body;
 
-    try {
-      const paciente = await PacienteService.findByEmail(email);
-      if (!paciente || paciente.password !== password) {
-        return res.status(401).json({ message: 'Credenciales inválidas' });
-      }
+    const paciente = await Paciente.findOne({ where: { email, password } });
 
-     
-      const token = generateJWT({ id: paciente.id, role: 'paciente' });
-      return res.status(200).json({ token });
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
+    if (!paciente) {
+      return res.status(400).json({ error: 'Credenciales incorrectas' });
     }
-  }
 
-  async assignAppointment(req, res) {
-    const { medicoId, date, hour } = req.body;
-    const pacienteId = req.user.id;
-
-    try {
-      const appointment = await PacienteService.assignAppointment(pacienteId, medicoId, date, hour);
-      return res.status(201).json(appointment);
-    } catch (error) {
-      return res.status(400).json({ message: error.message });
-    }
-  }
-
-
-  async obtenerPaciente(req, res) {
-    const pacienteId = req.params.id;
-
-    try {
-      const paciente = await PacienteService.findById(pacienteId);
-      if (!paciente) {
-        return res.status(404).json({ message: 'Paciente no encontrado' });
-      }
-      return res.status(200).json(paciente);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
+    const token = jwt.sign({ pacienteId: paciente.id }, 'clave_secreta', { expiresIn: '30m' });
+    return res.json({ token });
   }
 
   
+  async listarCitasPaciente(req, res) {
+    const { pacienteId } = req.params;
+    const { date } = req.query; 
+    
+    let citas;
+    if (date) {
+      citas = await CitaMedica.findAll({ where: { pacienteId, fecha: date } });
+    } else {
+      citas = await CitaMedica.findAll({ where: { pacienteId } });
+    }
+
+    return res.json(citas);
+  }
+
+ 
+  async asignarCita(req, res) {
+    const { pacienteId, medicoId, fecha, hora } = req.body;
+
+    const cita = await CitaMedica.create({ pacienteId, medicoId, fecha, hora });
+    return res.status(201).json(cita);
+  }
+
+
+  async editarCita(req, res) {
+    const { appointmentId } = req.params;
+    const { medicoId, fecha, hora } = req.body;
+
+    const cita = await CitaMedica.findByPk(appointmentId);
+    if (!cita) {
+      return res.status(404).json({ error: 'Cita no encontrada' });
+    }
+
+    cita.medicoId = medicoId;
+    cita.fecha = fecha;
+    cita.hora = hora;
+
+    await cita.save();
+    return res.json(cita);
+  }
+
+  async eliminarCita(req, res) {
+    const { appointmentId } = req.params;
+
+    const cita = await CitaMedica.findByPk(appointmentId);
+    if (!cita) {
+      return res.status(404).json({ error: 'Cita no encontrada' });
+    }
+
+    await cita.destroy();
+    return res.status(204).json();
+  }
+
+  
+  async obtenerPaciente(req, res) {
+    const { id } = req.params;
+    const paciente = await Paciente.findByPk(id);
+    if (!paciente) {
+      return res.status(404).json({ error: 'Paciente no encontrado' });
+    }
+    return res.json(paciente);
+  }
+
+
   async crearPaciente(req, res) {
     const { nombre, email, password } = req.body;
 
-    try {
-      const nuevoPaciente = await PacienteService.createPaciente({ nombre, email, password });
-      return res.status(201).json(nuevoPaciente);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
+    const paciente = await Paciente.create({ nombre, email, password });
+    return res.status(201).json(paciente);
   }
 }
 

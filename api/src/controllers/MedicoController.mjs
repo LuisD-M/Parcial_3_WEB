@@ -1,23 +1,36 @@
-import { MedicoService } from '../services/MedicoService.mjs';
+import { Medico } from '../models/Medico.mjs';  
+import { CitaMedica } from '../models/Citamedica.mjs';
 
 class MedicoController {
-  
-  async obtenerMedicos(req, res) {
-    try {
-      const medicos = await MedicoService.getMedicos(); 
-      return res.status(200).json(medicos);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
+
+
+  async obtenerMedico(req, res) {
+    const { doctorId } = req.params;
+    const medico = await Medico.findByPk(doctorId);
+    if (!medico) {
+      return res.status(404).json({ error: 'Médico no encontrado' });
     }
+    return res.json(medico);
   }
 
+ 
+  async listarCitasDoctor(req, res) {
+    const { doctorId } = req.params;
+    const citas = await CitaMedica.findAll({ where: { medicoId: doctorId } });
+    return res.json(citas);
+  }
+
+
+  async obtenerMedicos(req, res) {
+    const medicos = await Medico.findAll();
+    return res.json(medicos);
+  }
+
+ 
   async crearMedico(req, res) {
-    try {
-      const nuevoMedico = await MedicoService.createMedico(req.body); 
-      return res.status(201).json(nuevoMedico);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
+    const { nombre, especialidad } = req.body;
+    const medico = await Medico.create({ nombre, especialidad });
+    return res.status(201).json(medico);
   }
 }
 
