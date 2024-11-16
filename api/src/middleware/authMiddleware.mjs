@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { TOKEN_SECRET } from '../config.mjs';
+import { TOKEN_SECRET } from '../config/config.mjs';
 
 const verificarToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];

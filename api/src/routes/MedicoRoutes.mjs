@@ -1,9 +1,11 @@
 import express from 'express';
-import { DoctorController } from '../controllers/doctorController.mjs';
+import { MedicoController } from '../controllers/MedicoController.mjs';
 
 const router = express.Router();
 
-router.get('/', DoctorController.obtenerMedicos);
-router.post('/', DoctorController.crearMedico);
+const medicoController = new MedicoController();
 
-export { router as doctorRoutes };
+router.get('/', medicoController.obtenerMedicos);  
+router.post('/', medicoController.crearMedico);    
+
+export { router as MedicoRoutes };

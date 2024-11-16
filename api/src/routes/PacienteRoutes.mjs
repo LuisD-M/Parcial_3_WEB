@@ -1,9 +1,14 @@
 import express from 'express';
-import { PatientController } from '../controllers/patientController.mjs';
+import { PacienteController } from '../controllers/PacienteController.mjs';
 
 const router = express.Router();
 
-router.get('/:id', PatientController.obtenerPaciente);
-router.post('/', PatientController.crearPaciente);
+const pacienteController = new PacienteController();
 
-export { router as patientRoutes };
+// Rutas
+router.get('/:id', pacienteController.obtenerPaciente); 
+router.post('/', pacienteController.crearPaciente);  
+router.post('/login', pacienteController.login);  
+router.post('/assign-appointment', pacienteController.assignAppointment);  
+
+export { router as PacienteRoutes };
