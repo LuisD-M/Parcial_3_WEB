@@ -13,4 +13,9 @@ const verificarToken = (req, res, next) => {
   });
 };
 
-export { verificarToken };
+const setContentType = (req, res, next)=>{
+  res.set('content-type','application/json');
+  next();
+}
+
+export { verificarToken, setContentType };
